@@ -7,7 +7,7 @@ export default function TenantsLayout({
 }) {
   return (
     <main>
-      <nav className="mx-auto mb-4 flex h-12 items-center bg-slate-100 px-32">
+      <nav className="container mx-auto mb-4 flex h-12 items-center bg-slate-100">
         <Link href="/">
           <p className="font-bold">
             multi tenant <span className="text-blue-600">app</span>.

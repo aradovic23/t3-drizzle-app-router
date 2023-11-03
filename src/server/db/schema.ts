@@ -23,11 +23,8 @@ export const mysqlTable = mysqlTableCreator(
 
 export const users = mysqlTable("users", {
   id: serial("id").primaryKey(),
-  username: varchar("username", { length: 120 }),
-  tagline: varchar("tagline", { length: 250 }),
-  displayName: varchar("display_name", { length: 250 }),
-  img_url: varchar("img_url", { length: 500 }),
   role: text("role", { enum: ["ADMIN", "USER", "DEV"] }),
+  externalId: varchar("external_id", { length: 250 }),
 });
 
 export const tenants = mysqlTable("tenants", {
@@ -37,7 +34,7 @@ export const tenants = mysqlTable("tenants", {
   userId: int("user_id"),
   description: varchar("description", { length: 200 }),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedAt: timestamp("updated_at").onUpdateNow(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
