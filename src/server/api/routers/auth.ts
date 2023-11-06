@@ -12,8 +12,6 @@ export const authRouter = createTRPCRouter({
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
-    // TODO: check if the user is in the db
-
     const dbUser = await ctx.db.query.users.findFirst({
       where: (users, { eq }) => eq(users.externalId, user.id),
     });

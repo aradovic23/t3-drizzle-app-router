@@ -6,28 +6,30 @@ import {
   CardHeader,
   CardTitle,
 } from "../_components/ui/card";
-import { Button, buttonVariants } from "../_components/ui/button";
+import { buttonVariants } from "../_components/ui/button";
 import { db } from "~/server/db";
 import { UserButton } from "@clerk/nextjs";
-import { PlusIcon } from "lucide-react";
 
-export function TenantCard() {
+export interface TenantProps {
+  name: string | null;
+  displayName: string | null;
+  description: string | null;
+}
+
+export function TenantCard({ name, displayName, description }: TenantProps) {
   return (
-    <Card>
+    <Card className="flex flex-col justify-between">
       <CardHeader>
-        <div className="relative mb-2 h-32 w-full"></div>
-        <CardTitle>Tenant {Math.floor(Math.random() * 100)}</CardTitle>
+        <div className="hero-pattern relative mb-2 h-32 w-full rounded-md"></div>
+        <CardTitle>{displayName}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="line-clamp-3">
-          Now this quiet courtyard, Sunday afternoon, this girl with a luminous
-          digital display wired to a subcutaneous chip.
-        </p>
+        <p className="line-clamp-3">{description}</p>
       </CardContent>
       <CardFooter>
         <Link
           className={buttonVariants({ variant: "secondary" })}
-          href="/tenants/name"
+          href={`/tenants/${name}`}
         >
           Visit
         </Link>
@@ -38,7 +40,6 @@ export function TenantCard() {
 
 export default async function Page() {
   const data = await db.query.tenants.findMany();
-  console.log("🚀 data ===>", data);
 
   return (
     <div className="flex flex-col gap-5">
@@ -50,14 +51,25 @@ export default async function Page() {
             tenants page
           </p>
         </div>
-        <div>
+        <div className="flex items-center gap-3">
+          <Link
+            className={buttonVariants({ variant: "outline" })}
+            href="/dashboard"
+          >
+            Go to dashboard
+          </Link>
           <UserButton afterSignOutUrl="/" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-        {Array.from({ length: 6 }, (_, i) => (
-          <TenantCard key={i} />
+        {(data ?? []).map((tenant) => (
+          <TenantCard
+            key={tenant.id}
+            name={tenant.name}
+            displayName={tenant.displayName}
+            description={tenant.description}
+          />
         ))}
       </div>
     </div>

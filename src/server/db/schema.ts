@@ -32,7 +32,7 @@ export const tenants = mysqlTable("tenants", {
   name: varchar("name", { length: 250 }).unique(),
   displayName: varchar("display_name", { length: 250 }),
   userId: int("user_id"),
-  description: varchar("description", { length: 200 }),
+  description: varchar("description", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").onUpdateNow(),
 });
