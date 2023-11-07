@@ -3,7 +3,6 @@
 
 import { relations } from "drizzle-orm";
 import {
-  int,
   mysqlTableCreator,
   serial,
   text,
@@ -22,16 +21,15 @@ export const mysqlTable = mysqlTableCreator(
 );
 
 export const users = mysqlTable("users", {
-  id: serial("id").primaryKey(),
+  id: varchar("external_id", { length: 250 }).primaryKey(),
   role: text("role", { enum: ["ADMIN", "USER", "DEV"] }),
-  externalId: varchar("external_id", { length: 250 }),
 });
 
 export const tenants = mysqlTable("tenants", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 250 }).unique(),
   displayName: varchar("display_name", { length: 250 }),
-  userId: int("user_id"),
+  userId: varchar("user_id", { length: 250 }),
   description: varchar("description", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").onUpdateNow(),

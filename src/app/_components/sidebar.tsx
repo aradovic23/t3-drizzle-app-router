@@ -1,12 +1,13 @@
 "use client";
-import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
+import { Group, Home, IceCream, PieChart } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Group, PieChart, IceCream } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { auth, currentUser, useAuth, useUser } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { buttonVariants } from "./ui/button";
+import { api } from "~/trpc/react";
+import { Badge } from "./ui/badge";
 
 export type NavItem = {
   label: string;
@@ -41,15 +42,15 @@ export default function Sidebar() {
 
   const { user } = useUser();
 
+  const { data: dbUser } = api.auth.dbUser.useQuery();
+
   return (
     <div className="flex w-64 flex-col bg-white  px-4 py-8 shadow-md dark:bg-gray-800">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-zinc-800 dark:text-white">
-          Dashboard
-        </h2>
+      <div className="flex items-center space-x-4">
         <div className="rounded-full bg-zinc-800 p-1.5">
           <IceCream className="text-white" />
         </div>
+        <h1 className="text-lg font-medium">Ice Cream & Co.</h1>
       </div>
       <nav className="mt-6 flex-grow">
         <ul className="space-y-1">
@@ -58,9 +59,9 @@ export default function Sidebar() {
               <Link
                 className={cn(
                   buttonVariants({ variant: "ghost" }),
-                  "w-full hover:bg-blue-100 hover:text-blue-600",
+                  "w-full hover:bg-slate-200 hover:text-zinc-900",
                   {
-                    "bg-blue-100 text-blue-600": isActive(item.href),
+                    "bg-slate-200 text-zinc-900": isActive(item.href),
                   },
                 )}
                 href={item.href}
@@ -74,21 +75,18 @@ export default function Sidebar() {
           ))}
         </ul>
       </nav>
-      <div className="mt-4 rounded-md bg-gray-100 px-2 py-2 dark:bg-gray-700">
-        <div className="mt-1 flex items-center space-x-1">
-          <Avatar>
-            <AvatarImage src={user?.imageUrl} />
-            <AvatarFallback>{user?.fullName?.slice(0, 2)}</AvatarFallback>
-          </Avatar>
-          <div className="overflow-hidden">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-              {user?.fullName}
-            </p>
-            <p className="w-sm truncate text-xs text-gray-500 dark:text-gray-300">
-              {user?.primaryEmailAddress?.emailAddress}
-            </p>
-          </div>
+      <div className="flex flex-col items-center justify-end gap-2 rounded-md bg-gray-100 p-4 shadow-sm dark:bg-gray-900">
+        <Avatar className="h-16 w-16">
+          <AvatarImage alt="User name" src={user?.imageUrl} />
+          <AvatarFallback>{user?.firstName?.slice(0, 2)}</AvatarFallback>
+        </Avatar>
+        <div className="text-center">
+          <h2 className="text-sm font-medium">{user?.fullName}</h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            {user?.primaryEmailAddress?.emailAddress}
+          </p>
         </div>
+        <Badge>{dbUser?.role}</Badge>
       </div>
     </div>
   );

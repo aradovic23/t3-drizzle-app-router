@@ -33,7 +33,7 @@ const formSchema = z.object({
   userId: z.number(),
 });
 
-export default function CreateTenant({ userId }: { userId: number }) {
+export default function CreateTenant({ userId }: { userId: string }) {
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,9 +46,11 @@ export default function CreateTenant({ userId }: { userId: number }) {
     },
   });
 
+  const utils = api.useContext();
   const { mutate: create, isLoading } = api.tenant.create.useMutation({
-    onSuccess(data) {
-      router.push(`/dashboard/${data}`);
+    async onSuccess(data) {
+      await utils.tenant.invalidate();
+      router.push(`/dashboard/my-tenants/${data}`);
     },
   });
 
