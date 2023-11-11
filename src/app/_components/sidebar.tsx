@@ -4,10 +4,11 @@ import { Group, Home, IceCream, PieChart } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "~/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { buttonVariants } from "./ui/button";
 import { api } from "~/trpc/react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
+import { buttonVariants } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
 
 export type NavItem = {
   label: string;
@@ -42,7 +43,7 @@ export default function Sidebar() {
 
   const { user } = useUser();
 
-  const { data: dbUser } = api.auth.dbUser.useQuery();
+  const { data: dbUser, isLoading } = api.auth.dbUser.useQuery();
 
   return (
     <div className="flex w-64 flex-col bg-white  px-4 py-8 shadow-md dark:bg-gray-800">
@@ -75,19 +76,23 @@ export default function Sidebar() {
           ))}
         </ul>
       </nav>
-      <div className="flex flex-col items-center justify-end gap-2 rounded-md bg-gray-100 p-4 shadow-sm dark:bg-gray-900">
-        <Avatar className="h-16 w-16">
-          <AvatarImage alt="User name" src={user?.imageUrl} />
-          <AvatarFallback>{user?.firstName?.slice(0, 2)}</AvatarFallback>
-        </Avatar>
-        <div className="text-center">
-          <h2 className="text-sm font-medium">{user?.fullName}</h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            {user?.primaryEmailAddress?.emailAddress}
-          </p>
+      {isLoading ? (
+        <Skeleton className="h-44 w-full rounded-md" />
+      ) : (
+        <div className="flex flex-col items-center justify-end gap-2 rounded-md bg-gray-100 p-4 shadow-sm dark:bg-gray-900">
+          <Avatar className="h-16 w-16">
+            <AvatarImage alt="User name" src={user?.imageUrl} />
+            <AvatarFallback>{user?.firstName?.slice(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div className="text-center">
+            <h2 className="text-sm font-medium">{user?.fullName}</h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              {user?.primaryEmailAddress?.emailAddress}
+            </p>
+          </div>
+          <Badge>{dbUser?.role}</Badge>
         </div>
-        <Badge>{dbUser?.role}</Badge>
-      </div>
+      )}
     </div>
   );
 }

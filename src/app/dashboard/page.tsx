@@ -9,6 +9,10 @@ export default async function Page() {
     redirect("/auth-callback?origin=dashboard");
   }
 
+  if (user.publicMetadata.status === "NOT APPROVED") {
+    return <h1>you are not approved yet</h1>;
+  }
+
   return (
     <div className="grid place-content-center">
       <div className="flex flex-col gap-3">

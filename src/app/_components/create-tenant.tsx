@@ -27,7 +27,13 @@ import { Textarea } from "./ui/textarea";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  name: z.string().min(1),
+  name: z
+    .string()
+    .min(1)
+    .refine(
+      (s) => !s.includes(" "),
+      "No spaces allowed (use dashes to connect words 🙏)",
+    ),
   displayName: z.string().min(1),
   description: z.string().min(1).max(500),
   userId: z.number(),
@@ -49,8 +55,11 @@ export default function CreateTenant({ userId }: { userId: string }) {
   const utils = api.useContext();
   const { mutate: create, isLoading } = api.tenant.create.useMutation({
     async onSuccess(data) {
-      await utils.tenant.invalidate();
+      await utils.tenant.get.invalidate();
       router.push(`/dashboard/my-tenants/${data}`);
+    },
+    onError(error) {
+      console.log(error);
     },
   });
 

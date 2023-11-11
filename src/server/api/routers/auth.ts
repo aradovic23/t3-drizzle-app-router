@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs";
+import { currentUser, clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
@@ -25,6 +25,11 @@ export const authRouter = createTRPCRouter({
       await ctx.db.insert(users).values({
         id: user.id,
         role: "ADMIN",
+      });
+      await clerkClient.users.updateUserMetadata(user.id, {
+        publicMetadata: {
+          status: "NOT APPROVED",
+        },
       });
     }
 

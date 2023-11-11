@@ -1,5 +1,6 @@
+import { tenants } from "./../../db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -7,12 +8,29 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { tenants } from "~/server/db/schema";
 
 export const tenantRouter = createTRPCRouter({
+  // QUERIES
   get: publicProcedure.query(({ ctx }) => {
     return ctx.db.query.tenants.findMany();
   }),
+  getUserTenants: privateProcedure.query(async ({ ctx }) => {
+    if (!ctx.auth.userId) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return await ctx.db.query.tenants.findMany({
+      where: eq(tenants.userId, ctx.auth.userId),
+    });
+  }),
+  getTenantByName: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(({ input, ctx }) => {
+      return ctx.db.query.tenants.findFirst({
+        where: eq(tenants.name, input.name),
+      });
+    }),
+  // MUTATIONS
   create: privateProcedure
     .input(
       z.object({
@@ -35,13 +53,16 @@ export const tenantRouter = createTRPCRouter({
       });
       return tenant.insertId;
     }),
-  getUserTenants: privateProcedure.query(async ({ ctx }) => {
-    if (!ctx.auth.userId) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    return await ctx.db.query.tenants.findMany({
-      where: eq(tenants.userId, ctx.auth.userId),
-    });
-  }),
+  delete: privateProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.auth.userId) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await ctx.db
+        .delete(tenants)
+        .where(
+          and(eq(tenants.id, input.id), eq(tenants.userId, ctx.auth.userId)),
+        );
+    }),
 });
